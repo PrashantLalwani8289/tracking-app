@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from pydantic.networks import EmailStr
 
 from passlib.hash import bcrypt
 from sqlalchemy import and_
@@ -8,9 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.common import constants
 from app.config import env_variables
-from app.features.auth.schemas import (
-    UserSchema
-)
+from app.features.auth.schemas import UserSchema
 
 from app.models.User import User
 
@@ -30,14 +29,14 @@ async def signup(request: UserSchema, db : Session):
                 "message": constants.USER_WITH_EMAIL_ALREADY_EXISTS,
                 "success": False,
             }
-        else:
+
             # Create a new user object
-            new_user = User(
-                full_name=request.full_name,
-                email=request.email.lower(),
-                password=password_hash,
-                account_type="user",
-            )
+        new_user = User(
+            full_name=request.full_name,
+            email=request.email.lower(),
+            password=password_hash,
+            account_type="user",)
+     
 
         db.add(new_user)
         db.commit()
@@ -46,7 +45,7 @@ async def signup(request: UserSchema, db : Session):
         return {
             "message": constants.SIGNUP_SUCCESS,
             "success": True,
-            "data": UserSchema().dump(new_user),
+            "data":new_user.to_dict(),
         }
     except Exception as e:
         print("error in signup", e)

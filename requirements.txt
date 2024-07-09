@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+databases
+alembic
+asyncpg  # or aiomysql for MySQL
+python-dotenv
+passlib[bcrypt]
+pyjwt

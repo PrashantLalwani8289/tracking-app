@@ -53,3 +53,13 @@ async def signup(request: UserSchema, db : Session):
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
+    
+async def login (request: LoginUserSchema, db:Session):
+    try:
+        pass
+    except Exception as e:
+        print("error in login", e)
+        return {
+            "message": constants.INTERNAL_SERVER_ERROR,
+            "success": False,
+        }

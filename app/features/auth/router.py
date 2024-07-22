@@ -13,16 +13,16 @@ from app.features.auth.schemas import (
 )
 from app.utils.routes import routes
 
-router = APIRouter(prefix=routes.AUTH)
+authRouter = APIRouter(prefix=routes.AUTH)
 
 
 
-@router.post(routes.SIGNUP, response_model=ResponseModal)
+@authRouter.post(routes.SIGNUP, response_model=ResponseModal)
 async def signup_user(request: UserSchema, db: Session = Depends(db_connection)):
     return await signup(request, db)
 
 
 
-@router.post(routes.LOGIN, response_model=ResponseModal)
+@authRouter.post(routes.LOGIN, response_model=ResponseModal)
 async def login_user(request: LoginUserSchema, db: Session = Depends(db_connection)):
     return await login(request, db)

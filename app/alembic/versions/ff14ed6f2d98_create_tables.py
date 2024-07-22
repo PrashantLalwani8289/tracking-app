@@ -1,8 +1,8 @@
-"""empty message
+"""create tables
 
-Revision ID: 265bd9c5a72c
+Revision ID: ff14ed6f2d98
 Revises: 
-Create Date: 2024-07-09 13:25:04.931703
+Create Date: 2024-07-22 10:32:34.658055
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '265bd9c5a72c'
+revision: str = 'ff14ed6f2d98'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,7 +30,9 @@ def upgrade() -> None:
             sa.Enum("user", "admin", name="account_type_enum"),
             nullable=False,
         ),
+        sa.Column("is_active", sa.Boolean, default=False, nullable=False),
         sa.Column("created_ts", sa.DateTime(), nullable=True, default=sa.func.now()),
+        sa.Column("last_login", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
             "updated_ts",
             sa.DateTime(),
@@ -41,6 +43,17 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_users_id"), "users", ["id"], unique=False)
+    
+    op.create_table(
+        'user_sessions',
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('user_id', sa.Integer, sa.ForeignKey('users.id')),
+        sa.Column('token', sa.Text),
+        sa.Column('created_ts', sa.DateTime(timezone=True), default=sa.func.now()),
+        sa.Column('updated_ts', sa.DateTime(timezone=True),
+                  default=sa.func.now(), onupdate=sa.func.now()),
+    )
+ 
 
 
 def downgrade() -> None:

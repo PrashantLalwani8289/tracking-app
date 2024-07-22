@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Enum as sqEnum, Text
-
+from sqlalchemy.orm import relationship
 from app.database import Base
 # from sqlalchemy.orm import relationship
 
@@ -27,6 +27,11 @@ class User(Base):
     password = Column(
         String,
     )
+    is_active = Column(
+        Boolean,
+        default=False,
+    )
+    last_login = Column(DateTime(timezone=True), nullable=True)
     created_ts = Column(
         DateTime(timezone=True),
         default=datetime.now,
@@ -36,7 +41,7 @@ class User(Base):
         default=datetime.now,
         onupdate=datetime.now,
     )
-
+    user_sessions = relationship("UserSession", back_populates="user")
 
     def to_dict(self):
         return {
@@ -46,4 +51,6 @@ class User(Base):
             "account_type": self.account_type,
             "created_ts": self.created_ts,
             "updated_ts": self.updated_ts,
+            "last_login": self.last_login,
+            "is_active": self.is_active
         }

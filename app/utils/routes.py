@@ -12,6 +12,7 @@ class Routes:
     UPDATE_QUESTION_STATUS = "/update-question-status"
     UPLOAD_PROFILE_IMAGE= "/upload-profile-image"
     UPDATE_PASSWORD="/update-password"
+    GOOGLE_SIGN_IN="/google-signin"
 
 
 routes = Routes()

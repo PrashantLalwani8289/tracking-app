@@ -31,7 +31,11 @@ async def signup(request: UserSchema, db : Session):
                 "message": constants.USER_WITH_EMAIL_ALREADY_EXISTS,
                 "success": False,
             }
-
+        if request.password != request.confirm_password:
+            return {
+                "message": "Passwords do not match",
+                "success": False,
+            }
             # Create a new user object
         new_user = User(
             full_name=request.full_name,
@@ -78,12 +82,16 @@ async def login (request: LoginUserSchema, db:Session):
             session = UserSession(user_id=existing_user.id, token=access_token.decode())
             db.add(session)
             db.commit()
+            
             return{
                 "message": constants.LOGIN_SUCCESS,
                 "success": True,
                 "data":  {
-                    "token": access_token,
-                    "user": existing_user.to_dict(),
+
+                    "user": {"token" : access_token,
+                            "name": existing_user.full_name,
+                            "email": existing_user.email, 
+                            "id": existing_user.id},
                 },
             }
             

@@ -13,6 +13,7 @@ class Routes:
     UPLOAD_PROFILE_IMAGE= "/upload-profile-image"
     UPDATE_PASSWORD="/update-password"
     GOOGLE_SIGN_IN="/google-signin"
+    USER = "/user"
 
 
 routes = Routes()

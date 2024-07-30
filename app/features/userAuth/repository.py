@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic.networks import EmailStr
 
 from passlib.hash import bcrypt
-from app.features.auth.utils import create_access_token, generate_random_password
+from app.features.userAuth.utils import create_access_token, generate_random_password
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from google.oauth2 import id_token
@@ -12,7 +12,7 @@ from google.auth.transport import requests
 
 from app.common import constants
 from app.config import env_variables
-from app.features.auth.schemas import LoginUserSchema, Token, UserSchema
+from app.features.userAuth.schemas import LoginUserSchema, Token, UserSchema
 
 from app.models.User import User
 from app.models.user_sessions import UserSession
@@ -44,7 +44,7 @@ async def signup(request: UserSchema, db : Session):
             full_name=request.full_name,
             email=request.email.lower(),
             password=password_hash,
-            account_type="admin",
+            account_type="user",
             is_active=True,
             last_login=datetime.now()
         )

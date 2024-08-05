@@ -14,4 +14,9 @@ class LoginUserSchema(BaseModel):
 
 class Token(BaseModel):
     credentials: str
+    
+class UploadImage(BaseModel):
+    token: str
+    expire: str
+    signature: str
 

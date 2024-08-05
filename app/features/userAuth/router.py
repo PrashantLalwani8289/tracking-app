@@ -6,10 +6,11 @@ from app.database import db_connection
 from app.features.userAuth.repository import (
    google_log_in,
    login,
-   signup
+   signup,
+   upload_blog_image
 )
 from app.features.userAuth.schemas import (
-    Token,
+    Token, 
     UserSchema,
     LoginUserSchema
 )
@@ -33,3 +34,7 @@ async def login_user(request: LoginUserSchema, db: Session = Depends(db_connecti
 @user_router.post(routes.GOOGLE_SIGN_IN, response_model=ResponseModal)
 async def signin_with_google(request:Token, db: Session = Depends(db_connection)):
     return await google_log_in(request, db)
+
+@user_router.get(routes.UPLOAD_BLOG_IMAGE, response_model=ResponseModal)
+async def upload_image():
+    return await upload_blog_image()

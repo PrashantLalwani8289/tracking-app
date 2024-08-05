@@ -2,6 +2,10 @@ import json
 import os
 from datetime import datetime
 from pydantic.networks import EmailStr
+import hmac
+import hashlib
+import base64
+import time
 
 from passlib.hash import bcrypt
 from app.features.userAuth.utils import create_access_token, generate_random_password
@@ -12,7 +16,7 @@ from google.auth.transport import requests
 
 from app.common import constants
 from app.config import env_variables
-from app.features.userAuth.schemas import LoginUserSchema, Token, UserSchema
+from app.features.userAuth.schemas import LoginUserSchema, Token, UploadImage, UserSchema
 
 from app.models.User import User
 from app.models.user_sessions import UserSession
@@ -180,6 +184,36 @@ async def google_log_in(request:Token,db:Session ):
                 },
             }
             
+    except Exception as e:
+        print(e)
+        return{
+            "message": constants.INTERNAL_SERVER_ERROR,
+            "success": False,
+        }
+        
+IMAGEKIT_PRIVATE_KEY = env_data['IMAGEKIT_PRIVATE_KEY']
+# IMAGEKIT_PUBLIC_KEY = env_data['IMAGEKIT_PUBLIC_KEY']
+# IMAGEKIT_URL_ENDPOINT = env_data['IMAGEKIT_URL_ENDPOINT']     
+async def upload_blog_image( ):
+    try:
+        print(IMAGEKIT_PRIVATE_KEY)
+        token = base64.urlsafe_b64encode(os.urandom(32)).decode()
+        expire = str(int(time.time()) + 600)  # Token is valid for 10 minutes
+        signature = hmac.new(
+            IMAGEKIT_PRIVATE_KEY.encode(),
+            (token + expire).encode(),
+            hashlib.sha1
+        ).hexdigest()
+        # return UploadImage(token=token, expire=expire, signature=signature)
+        return{
+            "message": constants.UPLOAD_BLOG_IMAGE_SUCCESSFULL,
+            "success": True,
+            "data": {
+                "token": token,
+                "expire": expire,
+                "signature": signature
+            }
+        }
     except Exception as e:
         print(e)
         return{

@@ -14,6 +14,7 @@ class Routes:
     UPDATE_PASSWORD="/update-password"
     GOOGLE_SIGN_IN="/google-signin"
     USER = "/user"
+    UPLOAD_BLOG_IMAGE = "/upload-blog-image"
 
 
 routes = Routes()

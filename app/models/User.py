@@ -42,6 +42,7 @@ class User(Base):
         onupdate=datetime.now,
     )
     user_sessions = relationship("UserSession", back_populates="user")
+    user_sessions = relationship("Blogs", back_populates="user")
 
     def to_dict(self):
         return {

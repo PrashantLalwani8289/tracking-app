@@ -15,6 +15,8 @@ class Routes:
     GOOGLE_SIGN_IN="/google-signin"
     USER = "/user"
     UPLOAD_BLOG_IMAGE = "/upload-blog-image"
+    BLOG= "/blog"
+    CREATE_BLOG = "create-blog"
 
 
 routes = Routes()

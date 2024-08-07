@@ -16,7 +16,7 @@ class Routes:
     USER = "/user"
     UPLOAD_BLOG_IMAGE = "/upload-blog-image"
     BLOG= "/blog"
-    CREATE_BLOG = "create-blog"
+    CREATE_BLOG = "/create-blog"
 
 
 routes = Routes()

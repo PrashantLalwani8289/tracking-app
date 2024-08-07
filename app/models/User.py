@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Enum as sqEnum, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
-# from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship
 
 
 
@@ -42,7 +42,7 @@ class User(Base):
         onupdate=datetime.now,
     )
     user_sessions = relationship("UserSession", back_populates="user")
-    user_sessions = relationship("Blogs", back_populates="user")
+    blogs = relationship("Blogs", back_populates="user")
 
     def to_dict(self):
         return {

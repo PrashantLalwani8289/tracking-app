@@ -29,6 +29,11 @@ class Blogs(Base):
         String,
         nullable=True
     )
+    approved = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
     created_ts = Column(
         DateTime(timezone=True),
         default=datetime.now,
@@ -45,3 +50,16 @@ class Blogs(Base):
         cascade="all, delete-orphan",
         single_parent=True,
     )
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "title": self.title,
+            "descryption": self.descryption,
+            "category": self.category,
+            "mainImage": self.mainImage,
+            "approved": self.approved,
+            "created_ts": self.created_ts.isoformat() if self.created_ts else None,
+            "updated_ts": self.updated_ts.isoformat() if self.updated_ts else None,
+        }

@@ -52,16 +52,29 @@ async def signup(request: UserSchema, db : Session):
             is_active=True,
             last_login=datetime.now()
         )
-     
-
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        payload = {
+                "id": new_user.id,
+                "email": new_user.email,
+                "account_type": "user"
+            }
+        access_token = create_access_token(payload)
+        session = UserSession(user_id=new_user.id, token=access_token.decode())
+        db.add(session)
+        db.commit()
 
         return {
             "message": constants.SIGNUP_SUCCESS,
             "success": True,
-            "data":new_user.to_dict(),
+            "data":  {
+
+                    "user": {"token" : access_token,
+                            "name": new_user.full_name,
+                            "email": new_user.email, 
+                            "id": new_user.id},
+                },
         }
     except Exception as e:
         print("error in signup", e)

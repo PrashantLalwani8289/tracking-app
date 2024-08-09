@@ -10,7 +10,7 @@ from app.database import db_connection
 from app.models.User import User
 from app.models.user_sessions import UserSession
 
-env_data = env_variables()
+env_data = env_variables() 
 
 
 security = HTTPBearer()
@@ -29,8 +29,6 @@ async def is_user_authorised(
             jwt_token, env_data["SECRET_KEY"], algorithms=env_data["ALGORITHM"]
         )
 
-        # current_time = int(time.time())
-        # now = datetime.utcnow()
         id = payload.get("id")
         email = payload.get("email")
         account_type = payload.get("account_type")
@@ -50,18 +48,9 @@ async def is_user_authorised(
 
         if user_session is None:
             raise ValueError(constants.TOKEN_NOT_FOUND)
-        # if payload["exp"] <= current_time:
-        #     raise ValueError(constants.SESSION_EXPIRED)
-
+        
         if not user:
             raise ValueError(constants.USER_NOT_FOUND)
-
-        if not user.is_active:
-            raise ValueError(constants.USER_INACTIVE)
-
-        if not user.is_verified:
-            raise ValueError(constants.USER_NOT_VERIFIED)
-
         return {"id": id, "email": email, "account_type": account_type}
     except Exception as e:
         print(e, "Exception")

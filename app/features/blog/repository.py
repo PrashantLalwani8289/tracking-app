@@ -1,9 +1,18 @@
-from app.features.blog.schemas import CreateBlog
+from app.features.blog.schemas import CreateBlog, CurrentUser
+from app.models.User import User
 from sqlalchemy.orm import Session
 from app.models.Blogs import Blogs
 
-async def create_blog(request: CreateBlog, db: Session ):
+async def create_blog(request: CreateBlog, db: Session, current_user : CurrentUser ):
     try:
+        user_id = current_user["id"]
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return{
+                "message": "User not found",
+                "success": False,
+            }
+        
         new_blog = Blogs(user_id = 1,title=request.title, descryption=request.descryption, mainImage=request.mainImage,category=request.category) 
         db.add(new_blog)
         db.commit()

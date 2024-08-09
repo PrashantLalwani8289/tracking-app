@@ -209,7 +209,6 @@ IMAGEKIT_PRIVATE_KEY = env_data['IMAGEKIT_PRIVATE_KEY']
 # IMAGEKIT_URL_ENDPOINT = env_data['IMAGEKIT_URL_ENDPOINT']     
 async def upload_blog_image( ):
     try:
-        print(IMAGEKIT_PRIVATE_KEY)
         token = base64.urlsafe_b64encode(os.urandom(32)).decode()
         expire = str(int(time.time()) + 600)  # Token is valid for 10 minutes
         signature = hmac.new(
@@ -217,7 +216,6 @@ async def upload_blog_image( ):
             (token + expire).encode(),
             hashlib.sha1
         ).hexdigest()
-        # return UploadImage(token=token, expire=expire, signature=signature)
         return{
             "message": constants.UPLOAD_BLOG_IMAGE_SUCCESSFULL,
             "success": True,

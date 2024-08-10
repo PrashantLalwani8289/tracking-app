@@ -1,7 +1,7 @@
-from pydantic import BaseModel
 
-
-
+from pydantic import BaseModel, Field, HttpUrl
+from typing import List, Optional
+from enum import Enum
 
 
 class CurrentUser(BaseModel):
@@ -9,8 +9,27 @@ class CurrentUser(BaseModel):
     email: str
     account_type: str
 
+class CategoryEnum(str, Enum):
+    Technology = 'Technology'
+    Health = 'Health'
+    Travel = 'Travel'
+    Education = 'Education'
+    Finance = 'Finance'
+    Other = 'other'
+    
+    
 class CreateBlog(BaseModel):
-    title: str
-    descryption:str
-    mainImage:str
-    category:str
+    title: str = Field(..., example="My Travel Adventure")
+    category: CategoryEnum = Field(..., example="Travel")
+    mainImage: Optional[HttpUrl] = Field(None, example="https://example.com/image.jpg")
+    introduction: str = Field(..., example="This blog post is about...")
+    photos: List[HttpUrl] = Field(..., example=["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"])
+    tips: Optional[str] = Field(None, example="Pack light, always carry a first-aid kit.")
+    adventure: str = Field(..., example="Hiking in the Alps")
+    accomodationReview: Optional[str] = Field(None, example="Stayed at a cozy mountain lodge...")
+    destinationGuides: Optional[str] = Field(None, example="Top 10 things to do in Paris...")
+    customerReview: Optional[str] = Field(None, example="The service was excellent!")
+    travelChallenges: Optional[str] = Field(None, example="Lost luggage at the airport...")
+    conclusion: str = Field(..., example="Overall, it was a fantastic trip.")
+    latitude: float = Field(..., example=48.858844)
+    longitude: float = Field(..., example=2.294351)    

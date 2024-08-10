@@ -12,8 +12,26 @@ async def create_blog(request: CreateBlog, db: Session, current_user : CurrentUs
                 "message": "User not found",
                 "success": False,
             }
-        
-        new_blog = Blogs(user_id = 1,title=request.title, descryption=request.descryption, mainImage=request.mainImage,category=request.category) 
+        print(request)
+        print(request.mainImage)
+        new_blog = Blogs(
+            user_id=user_id,  
+            title=request.title,
+            introduction=request.introduction,
+            category=request.category,
+            mainImage=request.mainImage,
+            photos=request.photos,
+            tips=request.tips,
+            adventure=request.adventure,
+            accomodationReview=request.accomodationReview,
+            destinationGuides=request.destinationGuides,
+            customerReview=request.customerReview,
+            travelChallenges=request.travelChallenges,
+            conclusion=request.conclusion,
+            latitude=request.latitude,
+            longitude=request.longitude,
+            approved=False
+        )
         db.add(new_blog)
         db.commit()
         db.refresh(new_blog)  

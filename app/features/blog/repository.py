@@ -12,8 +12,7 @@ async def create_blog(request: CreateBlog, db: Session, current_user : CurrentUs
                 "message": "User not found",
                 "success": False,
             }
-        print(request)
-        print(request.mainImage)
+
         new_blog = Blogs(
             user_id=user_id,  
             title=request.title,
@@ -30,20 +29,38 @@ async def create_blog(request: CreateBlog, db: Session, current_user : CurrentUs
             conclusion=request.conclusion,
             latitude=request.latitude,
             longitude=request.longitude,
-            approved=False
         )
         db.add(new_blog)
         db.commit()
         db.refresh(new_blog)  
-        print(new_blog.to_dict())
         return {
             "message": "Blog created successfully",
             "success": True,
-            "data": new_blog.to_dict(),
+            "data": new_blog.to_dict()
         }
     except Exception as e:
         print(e)
         return{
             "message": "An error occurred while creating the blog",
+            "success": False,
+        }
+
+async def get_blog(BlogId: int, db : Session):
+    try:
+        blog = db.query(Blogs).filter(Blogs.id == BlogId).first()
+        if not blog:
+            return{
+                "message": "Blog not found",
+                "success": False,
+            }
+        return {
+            "message": "Blog found successfully",
+            "success": True,
+            "data": blog.to_dict()
+        }
+    except Exception as e : 
+        print(e)
+        return{
+            "message": "An error occurred while getting the blog",
             "success": False,
         }

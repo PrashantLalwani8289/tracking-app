@@ -21,9 +21,9 @@ class CategoryEnum(str, Enum):
 class CreateBlog(BaseModel):
     title: str = Field(..., example="My Travel Adventure")
     category: CategoryEnum = Field(..., example="Travel")
-    mainImage: Optional[HttpUrl] = Field(None, example="https://example.com/image.jpg")
+    mainImage: Optional[str] = Field(None, example="https://example.com/image.jpg")
     introduction: str = Field(..., example="This blog post is about...")
-    photos: List[HttpUrl] = Field(..., example=["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"])
+    photos: List[str] = Field(..., example=["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"])
     tips: Optional[str] = Field(None, example="Pack light, always carry a first-aid kit.")
     adventure: str = Field(..., example="Hiking in the Alps")
     accomodationReview: Optional[str] = Field(None, example="Stayed at a cozy mountain lodge...")
@@ -33,3 +33,6 @@ class CreateBlog(BaseModel):
     conclusion: str = Field(..., example="Overall, it was a fantastic trip.")
     latitude: float = Field(..., example=48.858844)
     longitude: float = Field(..., example=2.294351)    
+    
+    
+    

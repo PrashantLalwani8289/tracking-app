@@ -67,7 +67,7 @@ class Blogs(Base):
             "user_id": self.user_id,
             "title": self.title,
             "introduction": self.introduction,
-            "category": self.category.value,  # .value for Enum to get the actual string value
+            "category": self.category,  
             "mainImage": self.mainImage,
             "photos": self.photos,
             "tips": self.tips,

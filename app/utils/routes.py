@@ -18,6 +18,7 @@ class Routes:
     BLOG= "/blog"
     CREATE_BLOG = "/create-blog"
     GET_BLOG="/get-blog"
+    GET_ALL_BLOG="/get-all-blogs"
 
 
 routes = Routes()

@@ -17,7 +17,7 @@ async def create_blog(request: CreateBlog, db: Session, current_user : CurrentUs
             user_id=user_id,  
             title=request.title,
             introduction=request.introduction,
-            category=request.category,
+            category=request.category, 
             mainImage=request.mainImage,
             photos=request.photos,
             tips=request.tips,
@@ -57,6 +57,27 @@ async def get_blog(BlogId: int, db : Session):
             "message": "Blog found successfully",
             "success": True,
             "data": blog.to_dict()
+        }
+    except Exception as e : 
+        print(e)
+        return{
+            "message": "An error occurred while getting the blog",
+            "success": False,
+        }
+        
+async def get_all_blogs(db : Session):
+    try:
+        blogs = db.query(Blogs).limit(10)
+        if not blogs:
+            return{
+                "message": "Blogs not found",
+                "success": False,
+            }
+    
+        return {
+            "message": "Blogs found successfully",
+            "success": True,
+            "data": [blog.to_dict() for blog in blogs]
         }
     except Exception as e : 
         print(e)

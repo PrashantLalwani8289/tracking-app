@@ -78,6 +78,12 @@ def upgrade() -> None:
         sa.Column('created_ts', sa.DateTime(timezone=True), nullable=True, default=sa.func.now()),
         sa.Column('updated_ts', sa.DateTime(timezone=True), nullable=True, default=sa.func.now(), onupdate=sa.func.now())
     )
+    op.create_table(
+        'subscribers',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('email', sa.String(), nullable=False, unique=True),
+        sa.PrimaryKeyConstraint('id'),
+    )
 
 
 def downgrade() -> None:

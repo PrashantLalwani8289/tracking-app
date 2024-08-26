@@ -9,6 +9,7 @@ import time
 
 from passlib.hash import bcrypt
 from app.features.userAuth.utils import create_access_token, generate_random_password
+from app.models.Blogs import Blogs
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from google.oauth2 import id_token
@@ -207,7 +208,7 @@ async def google_log_in(request:Token,db:Session ):
 IMAGEKIT_PRIVATE_KEY = env_data['IMAGEKIT_PRIVATE_KEY']
 # IMAGEKIT_PUBLIC_KEY = env_data['IMAGEKIT_PUBLIC_KEY']
 # IMAGEKIT_URL_ENDPOINT = env_data['IMAGEKIT_URL_ENDPOINT']     
-async def upload_blog_image( ):
+async def upload_blog_image():
     try:
         token = base64.urlsafe_b64encode(os.urandom(32)).decode()
         expire = str(int(time.time()) + 600)  # Token is valid for 10 minutes
@@ -231,4 +232,56 @@ async def upload_blog_image( ):
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
+    
+    
+async def get_user(userId : int, db = Session):
+    try:
+        user = db.query(User).filter(User.id == userId).first()
+        if user:
+            return {
+                "message": constants.USER_FOUND,
+                "success": True,
+                "data": {
+                    "user": {
+                        "id": user.id,
+                        "name": user.full_name,
+                        "email": user.email,
+                        "account_type": user.account_type,
+                        "is_active": user.is_active,
+                        "last_login": user.last_login
+                    }
+                }
+            }
+        else:
+            return {
+                "message": constants.USER_NOT_FOUND,
+                "success": False,
+            }
+    except Exception as e:
+        print("error in getUser", e)
+        return {
+            "message": constants.INTERNAL_SERVER_ERROR,
+            "success": False,
+        }
         
+        
+async def get_user_blogs(userId : int, db = Session):
+    try:
+        blogs = db.query(Blogs).filter(Blogs.user_id == userId).limit(10)
+        if blogs:
+            return {
+                "message": constants.BLOGS_FOUND,
+                "success": True,
+                "data": [blog.to_dict() for blog in blogs]
+            }
+        else:
+            return {
+                "message": constants.BLOGS_NOT_FOUND,
+                "success": False,
+            }
+    except Exception as e:
+        print("error in getUser", e)
+        return {
+            "message": constants.INTERNAL_SERVER_ERROR,
+            "success": False,
+        }

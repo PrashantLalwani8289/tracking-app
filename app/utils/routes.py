@@ -19,6 +19,11 @@ class Routes:
     CREATE_BLOG = "/create-blog"
     GET_BLOG="/get-blog"
     GET_ALL_BLOG="/get-all-blogs"
+    SUBSCRIBE="/subscribe"
+    SUBSCRIBE_NEW_USER="/subscribe-new-user"
+    CONTACT_FORM="/contact-form"
+    GET_USER="/get-user"
+    GET_USER_BLOGS="/get-user-blogs"
 
 
 routes = Routes()

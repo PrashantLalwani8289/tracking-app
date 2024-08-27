@@ -24,6 +24,8 @@ class Routes:
     CONTACT_FORM="/contact-form"
     GET_USER="/get-user"
     GET_USER_BLOGS="/get-user-blogs"
+    ADMIN_DASHBOARD="/admin-dashboard"
+    MINI_CARD_DETAILS="/mini-cards-details"
 
 
 routes = Routes()

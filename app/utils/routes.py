@@ -26,6 +26,8 @@ class Routes:
     GET_USER_BLOGS="/get-user-blogs"
     ADMIN_DASHBOARD="/admin-dashboard"
     MINI_CARD_DETAILS="/mini-cards-details"
+    HANDLE_REACTION="/reaction"
+    ADD_COMMENT="/add-comment"
 
 
 routes = Routes()

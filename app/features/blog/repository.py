@@ -1,7 +1,9 @@
-from app.features.blog.schemas import CreateBlog, CurrentUser
+from datetime import datetime
+from app.features.blog.schemas import CommentSchema, CreateBlog, CurrentUser
 from app.models.User import User
 from sqlalchemy.orm import Session
 from app.models.Blogs import Blogs
+from app.models.Comment import Comment 
 
 async def create_blog(request: CreateBlog, db: Session, current_user : CurrentUser ):
     try:
@@ -83,5 +85,52 @@ async def get_all_blogs(db : Session):
         print(e)
         return{
             "message": "An error occurred while getting the blog",
+            "success": False,
+        }
+        
+async def handle_reaction(db : Session):
+    try:
+        return{
+            "message": "Reaction handled successfully",
+            "success": True,
+        }
+    except Exception as e:
+        print(e)
+        return{
+            "message": "An error occurred while handling reaction",
+            "success": False,
+        }
+        
+async def add_comment(request: CommentSchema, db : Session, current_user: CurrentUser):
+    try:
+        print(request)
+        user_id = current_user["id"]
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return{
+                "message": "User not found",
+                "success": False,
+            }
+        
+        
+        new_comment = Comment(
+            user_id=user_id,
+            blog_id=request.blog_id,
+            text=request.text,
+            created_ts=datetime.now(),
+            parent_id=request.parent_id if request.parent_id is not None else None
+        )
+        db.add(new_comment)
+        db.commit()
+        db.refresh(new_comment)
+        return {
+            "message": "Comment created successfully",
+            "success": True,
+            "data": new_comment.to_dict()
+        }
+    except Exception as e:
+        print(e)
+        return{
+            "message": "An error occurred while creating the comment",
             "success": False,
         }

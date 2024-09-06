@@ -35,4 +35,7 @@ class CreateBlog(BaseModel):
     longitude: float = Field(..., example=2.294351)    
     
     
-    
+class CommentSchema(BaseModel):
+    blog_id : int
+    text : str
+    parent_id: int | None = None

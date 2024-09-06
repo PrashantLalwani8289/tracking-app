@@ -42,7 +42,9 @@ class User(Base):
     )
     user_sessions = relationship("UserSession", back_populates="user")
     blogs = relationship("Blogs", back_populates="user")
-
+    comment = relationship("Comment", back_populates="user")
+    like = relationship("Like", back_populates="user")
+    
     def to_dict(self):
         return {
             "id": self.id,

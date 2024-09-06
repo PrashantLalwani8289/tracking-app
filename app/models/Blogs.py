@@ -61,6 +61,9 @@ class Blogs(Base):
         single_parent=True,
     )
     
+    comment = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")  
+    like = relationship("Like", back_populates="blog", cascade="all, delete-orphan")
+
     def to_dict(self):
         return {
             "id": self.id,

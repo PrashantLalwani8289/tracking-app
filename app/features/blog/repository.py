@@ -1,5 +1,6 @@
 from datetime import datetime
-from app.features.blog.schemas import CommentSchema, CreateBlog, CurrentUser
+from app.features.blog.schemas import CommentSchema, CreateBlog, CurrentUser, LikeSchema
+from app.models.LIke import Like
 from app.models.User import User
 from sqlalchemy.orm import Session
 from app.models.Blogs import Blogs
@@ -88,8 +89,36 @@ async def get_all_blogs(db : Session):
             "success": False,
         }
         
-async def handle_reaction(db : Session):
+async def handle_reaction(request: LikeSchema, db : Session, current_user: CurrentUser):
     try:
+        current_user_id = current_user["id"];
+        user = db.query(User).filter(request.user_id == current_user_id).first();
+        if not user:
+            return{
+                "message": "User not found",
+                "success": False,
+            }
+        blog = db.query(Blogs).filter(Blogs.id == request.blog_id).first();
+        if not blog:
+            return{
+                "message": "Blog not found",
+                "success": False,
+            }
+        like = db.query(Like).filter(request.blog_id == Like.blog_id).filter(request.user_id == Like.user_id).first();
+        if like:
+            db.delete(like)
+            db.commit()
+            return {
+                "message": "Reaction removed successfully",
+                "success": True,
+            }
+        like = Like(
+            user_id=request.user_id,
+            blog_id=request.blog_id,
+        )
+        db.add(like)
+        db.commit()
+        db.refresh(like)
         return{
             "message": "Reaction handled successfully",
             "success": True,
@@ -105,6 +134,7 @@ async def add_comment(request: CommentSchema, db : Session, current_user: Curren
     try:
         print(request)
         user_id = current_user["id"]
+        user_email = current_user["email"]
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return{
@@ -115,6 +145,7 @@ async def add_comment(request: CommentSchema, db : Session, current_user: Curren
         
         new_comment = Comment(
             user_id=user_id,
+            user_name=user_email,
             blog_id=request.blog_id,
             text=request.text,
             created_ts=datetime.now(),
@@ -134,3 +165,36 @@ async def add_comment(request: CommentSchema, db : Session, current_user: Curren
             "message": "An error occurred while creating the comment",
             "success": False,
         }
+        
+
+async def get_all_comments(blog_id : int,comment_id:int, db : Session):
+    try:
+        blog = db.query(Blogs).filter(Blogs.id == blog_id).first()
+        if not blog:
+            return{
+                "message": "Blog not found",
+                "success": False,
+            }
+        if int(comment_id) != -1:
+            comments = db.query(Comment).filter(Comment.parent_id == comment_id).limit(10);
+        else:    
+            comments = db.query(Comment).filter(Comment.parent_id == None).limit(10);
+        data = [comment.to_dict() for comment in comments]
+        if(len(data) == 0):
+            return{
+                "message": "No comments found",
+                "success": True,
+                "data": []
+            }
+        return {
+            "message": "Comments fetched successfully",
+            "success": True,
+            "data": data
+        }  
+    except Exception as e:
+        print(e)
+        return{
+            "message": "An error occurred while fetching the comment",
+            "success": False,
+        }
+        

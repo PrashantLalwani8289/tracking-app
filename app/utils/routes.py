@@ -28,6 +28,7 @@ class Routes:
     MINI_CARD_DETAILS="/mini-cards-details"
     HANDLE_REACTION="/reaction"
     ADD_COMMENT="/add-comment"
+    GET_COMMENTS="/get-comments"
 
 
 routes = Routes()

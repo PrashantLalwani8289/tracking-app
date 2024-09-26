@@ -22,7 +22,7 @@ class Blogs(Base):
         nullable=False
     )
     category =  Column(
-        sqEnum("Technology", "Health", "Travel", "Education", "Finance", "other"),
+        sqEnum("Beach", "Camping", "Hiking", "Desert", "Forest", "LongDrives", "FamilyTrips"),
         nullable=False,
     )
     mainImage = Column(
@@ -62,7 +62,7 @@ class Blogs(Base):
     )
     
     comment = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")  
-    like = relationship("Like", back_populates="blog", cascade="all, delete-orphan")
+    # like = relationship("Like", back_populates="blog", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {

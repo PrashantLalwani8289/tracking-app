@@ -2,8 +2,8 @@
 
 from typing import Union
 from fastapi import APIRouter, Depends, Query
-from app.features.blog.repository import add_comment, create_blog, get_all_blogs, get_blog, handle_reaction
-from app.features.blog.schemas import  CommentSchema, CreateBlog
+from app.features.blog.repository import add_comment, create_blog, get_all_blogs, get_all_comments, get_blog, handle_reaction
+from app.features.blog.schemas import  CommentSchema, CreateBlog, LikeSchema
 from app.utils.routes import routes
 from sqlalchemy.orm import Session
 
@@ -28,10 +28,14 @@ async def get_the_blog(BlogId: Union[int, str] = Query(-1,description="Enter the
 async def get_the_blog( db: Session = Depends(db_connection)):
     return await get_all_blogs(db) 
 
-@blogRouter.get(routes.HANDLE_REACTION, response_model=ResponseModal)
-async def handle_like( db: Session = Depends(db_connection)):
-    return await handle_reaction(db) 
+@blogRouter.post(routes.HANDLE_REACTION, response_model=ResponseModal)
+async def handle_like( request : LikeSchema, db: Session = Depends(db_connection), currentUser: dict = Depends(is_user_authorised)):
+    return await handle_reaction(request, db, currentUser) 
 
 @blogRouter.post(routes.ADD_COMMENT, response_model=ResponseModal)
 async def add_new_comment(request: CommentSchema, db: Session = Depends(db_connection), currentUser: dict = Depends(is_user_authorised)):
     return await add_comment(request, db, currentUser)
+
+@blogRouter.get(routes.GET_COMMENTS, response_model=ResponseModal)
+async def get_comments(blog_id : Union[int, str]= Query(-1),comment_id : Union[int, str]= Query(-1), db: Session = Depends(db_connection)):
+    return await get_all_comments(blog_id, comment_id, db)

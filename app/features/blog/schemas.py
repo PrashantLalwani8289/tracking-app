@@ -10,12 +10,13 @@ class CurrentUser(BaseModel):
     account_type: str
 
 class CategoryEnum(str, Enum):
-    Technology = 'Technology'
-    Health = 'Health'
-    Travel = 'Travel'
-    Education = 'Education'
-    Finance = 'Finance'
-    Other = 'other'
+    Camping="Camping"
+    Hiking="Hiking"
+    Desert="Desert"
+    Forest="Forest"
+    LongDrives="LongDrives"
+    FamilyTrips="FamilyTrips"
+    Beach="Beach"
     
     
 class CreateBlog(BaseModel):
@@ -35,7 +36,12 @@ class CreateBlog(BaseModel):
     longitude: float = Field(..., example=2.294351)    
     
     
+class LikeSchema(BaseModel):
+    blog_id : int
+    user_id: int
 class CommentSchema(BaseModel):
+    user_id : int | None = None
     blog_id : int
     text : str
     parent_id: int | None = None
+

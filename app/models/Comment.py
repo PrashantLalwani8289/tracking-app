@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Column, DateTime, Integer,  Text
+from sqlalchemy import ForeignKey, Column, DateTime, Integer,  Text, String
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -11,6 +11,7 @@ class Comment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    user_name = Column(String, nullable=False)
     blog_id = Column(Integer, ForeignKey('blogs.id')) 
     text = Column(Text, nullable=False)
     created_ts = Column(
@@ -39,6 +40,7 @@ class Comment(Base):
             "user_id": self.user_id,
             "blog_id": self.blog_id,
             "text": self.text,
+            "user_name": self.user_name,
             "created_ts": self.created_ts,
             "updated_ts": self.updated_ts,
             "parent_id": self.parent_id if self.parent_id is not None else None

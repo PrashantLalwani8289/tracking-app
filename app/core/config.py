@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Tracking App"
     PROJECT_VERSION: str = "0.1.0"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
+        "*",
         "http://localhost:5173",
         "http://localhost:3000",
         "http://localhost:3001",

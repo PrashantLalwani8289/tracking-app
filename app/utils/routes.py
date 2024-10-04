@@ -29,6 +29,7 @@ class Routes:
     HANDLE_REACTION="/reaction"
     ADD_COMMENT="/add-comment"
     GET_COMMENTS="/get-comments"
+    GET_ALL_BLOG_BY_CATEGORY="/get-blog-by-category"
 
 
 routes = Routes()

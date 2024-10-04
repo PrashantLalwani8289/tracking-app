@@ -88,7 +88,31 @@ async def get_all_blogs(db : Session):
             "message": "An error occurred while getting the blog",
             "success": False,
         }
-        
+      
+      
+async def get_all_blogs_by_category(category: str, db : Session):
+    try:
+        blogs = db.query(Blogs).filter(Blogs.category == category).limit(10)
+        count = db.query(Blogs).filter(Blogs.category == category).count()
+        if not blogs:
+            return{
+                "message": "Blogs not found",
+                "success": False,
+            }
+    
+        return {
+            "message": "Blogs found successfully",
+            "success": True,
+            "data": {"data":[blog.to_dict() for blog in blogs],
+                     "total_count": count}
+        }
+    except Exception as e : 
+        print(e)
+        return{
+            "message": "An error occurred while getting the blog",
+            "success": False,
+        }
+   
 async def handle_reaction(request: LikeSchema, db : Session, current_user: CurrentUser):
     try:
         current_user_id = current_user["id"];
@@ -178,14 +202,14 @@ async def get_all_comments(blog_id : int,comment_id:int, db : Session):
         if int(comment_id) != -1:
             comments = db.query(Comment).filter(Comment.parent_id == comment_id).limit(10);
         else:    
-            comments = db.query(Comment).filter(Comment.parent_id == None).limit(10);
+            comments = db.query(Comment).filter(Comment.blog_id == blog_id).filter(Comment.parent_id == None).limit(10);
         data = [comment.to_dict() for comment in comments]
         if(len(data) == 0):
             return{
                 "message": "No comments found",
                 "success": True,
                 "data": []
-            }
+            }   
         return {
             "message": "Comments fetched successfully",
             "success": True,

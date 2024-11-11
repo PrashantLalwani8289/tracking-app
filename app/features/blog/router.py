@@ -2,7 +2,7 @@
 
 from typing import Union
 from fastapi import APIRouter, Depends, Query
-from app.features.blog.repository import add_comment, create_blog, get_all_blogs, get_all_blogs_by_category, get_all_comments, get_blog, handle_reaction
+from app.features.blog.repository import add_comment, create_blog, get_all_blogs, get_all_blogs_by_category, get_all_comments, get_blog, get_top_3_blogs, handle_reaction
 from app.features.blog.schemas import  CommentSchema, CreateBlog, LikeSchema
 from app.utils.routes import routes
 from sqlalchemy.orm import Session
@@ -27,6 +27,11 @@ async def get_the_blog(BlogId: Union[int, str] = Query(-1,description="Enter the
 @blogRouter.get(routes.GET_ALL_BLOG, response_model=ResponseModal)
 async def get_the_blog( db: Session = Depends(db_connection)):
     return await get_all_blogs(db) 
+
+
+@blogRouter.get(routes.GET_TOP_3_BLOGS, response_model=ResponseModal)
+async def get_the_blog( db: Session = Depends(db_connection)):
+    return await get_top_3_blogs(db) 
 
 @blogRouter.get(routes.GET_ALL_BLOG_BY_CATEGORY, response_model=ResponseModal)
 async def get_the_blog(category:str = Query("all"), db: Session = Depends(db_connection)):

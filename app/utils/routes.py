@@ -30,6 +30,7 @@ class Routes:
     ADD_COMMENT="/add-comment"
     GET_COMMENTS="/get-comments"
     GET_ALL_BLOG_BY_CATEGORY="/get-blog-by-category"
+    GET_TOP_3_BLOGS="/get-top-3-blogs"
 
 
 routes = Routes()

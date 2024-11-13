@@ -20,6 +20,7 @@ class CategoryEnum(str, Enum):
     
     
 class CreateBlog(BaseModel):
+    DestinationPlace: str = Field(..., example="My Travel Adventure")
     title: str = Field(..., example="My Travel Adventure")
     category: CategoryEnum = Field(..., example="Travel")
     mainImage: Optional[str] = Field(None, example="https://example.com/image.jpg")

@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 async def create_blog(request: CreateBlog, db: Session, current_user: CurrentUser):
     try:
+        print(request)
         user_id = current_user["id"]
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -20,6 +21,7 @@ async def create_blog(request: CreateBlog, db: Session, current_user: CurrentUse
 
         new_blog = Blogs(
             user_id=user_id,
+            destination_place= request.DestinationPlace,
             title=request.title,
             introduction=request.introduction,
             category=request.category,

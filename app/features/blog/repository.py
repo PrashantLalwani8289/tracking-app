@@ -1,5 +1,13 @@
 from datetime import datetime
-from app.features.blog.schemas import CommentSchema, CreateBlog, CurrentUser, LikeSchema
+import json
+from app.features.blog.response import GPT
+from app.features.blog.schemas import (
+    CommentSchema,
+    CreateBlog,
+    CurrentUser,
+    Destination,
+    LikeSchema,
+)
 from app.models.LIke import Like
 from app.models.User import User
 from sqlalchemy.orm import Session
@@ -7,6 +15,7 @@ from app.models.Blogs import Blogs
 from app.models.Comment import Comment
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+
 
 async def create_blog(request: CreateBlog, db: Session, current_user: CurrentUser):
     try:
@@ -21,7 +30,7 @@ async def create_blog(request: CreateBlog, db: Session, current_user: CurrentUse
 
         new_blog = Blogs(
             user_id=user_id,
-            destination_place= request.DestinationPlace,
+            destination_place=request.DestinationPlace,
             title=request.title,
             introduction=request.introduction,
             category=request.category,
@@ -115,7 +124,7 @@ async def get_top_3_blogs(db: Session):
         return {
             "message": "Blogs found successfully",
             "success": True,
-            "data": [blog.to_dict() for blog,_ in blogs],
+            "data": [blog.to_dict() for blog, _ in blogs],
         }
     except Exception as e:
         print(e)
@@ -270,5 +279,32 @@ async def get_all_comments(blog_id: int, comment_id: int, db: Session):
         print(e)
         return {
             "message": "An error occurred while fetching the comment",
+            "success": False,
+        }
+
+
+async def get_destination_summary(
+    request: Destination, db: Session, current_user: CurrentUser
+):
+    try:
+        user_id = current_user["id"]
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return {
+                "message": "User not found",
+                "success": False,
+            }
+        destination = request.destination
+        response = GPT().query(input=destination)
+        data = json.loads(response)
+        return {
+            "message": "Destination summary fetched successfully",
+            "success": True,
+            "data": data,
+        }
+    except Exception as e:
+        print(e)
+        return {
+            "message": "An error occurred while fetching the destination summary",
             "success": False,
         }

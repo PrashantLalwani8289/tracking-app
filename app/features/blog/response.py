@@ -4,8 +4,10 @@ from app.config import env_variables
 
 
 class GPT:
+    print(env_variables)
+
     def __init__(self):
-        self.api_key = "AIzaSyASbqO5mGhlq0nViOEGQA3mK4EnRgLfNXE"
+        self.api_key = ""
 
     def query(self, input: str) -> list:
         genai.configure(api_key=self.api_key)
@@ -30,10 +32,10 @@ class GPT:
             "output_requirements": {{
                 "ignore_generic_text": "If the destination input is generic or unrelated to a specific place (e.g., 'anywhere,' 'nowhere,' 'unknown'), return an empty string with no response.",
                 "if_not_related_to_travel": "If the destination is not related to a specific travel location (e.g., random strings, calculations, unrelated topics), return an empty string with no response.",
-                "no_additional_text": "Do not include any additional explanations or text or any special symbols like -, * , etc.",
+                "no_additional_text": " ** IMPORTANT ** Do not include any additional explanations or text or any special symbols like -, * , etc.",
                 "keyword_check": "Generate a response only if the destination name includes words that indicate a specific place (e.g., city names, countries, landmarks, regions). Avoid responding to titles that are not clearly related to a travel destination.",
                 "coordinates_check": "Only include latitude and longitude if they are relevant and accurate to the destination."
-            }},
+            }},    
             "examples": [
                 {{
                     "input_destination": "Bali",
@@ -51,6 +53,7 @@ class GPT:
                         "longitude": 115.0920
                     }}
                 }},
+                {{"input_destination": "Unknown", "response": {{""}}}},
                 {{
                     "input_destination": "Paris",
                     "response": {{

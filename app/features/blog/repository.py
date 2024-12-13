@@ -8,6 +8,7 @@ from app.features.blog.schemas import (
     Destination,
     LikeSchema,
 )
+from app.models import Subscribers
 from app.models.LIke import Like
 from app.models.User import User
 from sqlalchemy.orm import Session
@@ -306,5 +307,23 @@ async def get_destination_summary(
         print(e)
         return {
             "message": "An error occurred while fetching the destination summary",
+            "success": False,
+        }
+
+
+async def get_about_page_details(db: Session):
+    try:
+        total_blogs = db.query(Blogs).count()
+        total_subscribers = db.query(Subscribers).count()
+
+        return {
+            "message": "About page details fetched successfully",
+            "success": True,
+            "data": [],
+        }
+    except Exception as e:
+        print(e)
+        return {
+            "message": "An error occurred while fetching about page details",
             "success": False,
         }

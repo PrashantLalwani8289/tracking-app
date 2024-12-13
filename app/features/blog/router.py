@@ -1,5 +1,11 @@
+import base64
+from datetime import datetime
+import os
 from typing import Union
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, WebSocket
+
+# from fastapi import File, UploadFile, HTTPException
+from pydantic import BaseModel
 from app.features.blog.repository import (
     add_comment,
     create_blog,
@@ -15,12 +21,25 @@ from app.features.blog.schemas import CommentSchema, CreateBlog, Destination, Li
 from app.utils.routes import routes
 from sqlalchemy.orm import Session
 
+# import whisper
+# import warnings
+# import io
+# from pydub import AudioSegment
+# import numpy as np
+
+# warnings.filterwarnings("ignore", message="FP16 is not supported on CPU")
 from app.common.schemas import ResponseModal
 from app.database import db_connection
 
 from app.utils.oauth import is_user_authorised
 
 blogRouter = APIRouter(prefix=routes.BLOG)
+
+# Convert to float32
+
+
+# model = whisper.load_model("base")
+# model = model.float()
 
 
 @blogRouter.post(routes.CREATE_BLOG, response_model=ResponseModal)
@@ -91,3 +110,98 @@ async def get_comments(
     currentUser: dict = Depends(is_user_authorised),
 ):
     return await get_destination_summary(request, db, currentUser)
+
+
+@blogRouter.post("/transcribe", response_model=ResponseModal)
+async def get_comments(
+    request: Destination,
+    db: Session = Depends(db_connection),
+    currentUser: dict = Depends(is_user_authorised),
+):
+    return await get_destination_summary(request, db, currentUser)
+
+
+# class TranscriptResponse(BaseModel):
+#     transcript: str
+
+
+# def convert_audio_to_text(audio_file_path):
+#     # wav_file_path = convert_audio_to_wav(audio_file_path)
+
+#     result = model.transcribe(audio_file_path)
+#     text = result["text"]
+
+#     # if os.path.exists(wav_file_path):
+#     #     os.remove(wav_file_path)
+
+#     return text
+
+
+# class AudioInput(BaseModel):
+#     audio: str
+
+
+# def fix_base64_padding(data):
+#     missing_padding = len(data) % 4
+#     if missing_padding:
+#         data += "=" * (4 - missing_padding)
+#     return data
+
+
+# @blogRouter.post("/transcribe-audio", response_model=ResponseModal)
+# async def transcribe_audio(audio_input: AudioInput):
+#     try:
+#         print(audio_input.audio[21:], "audio_input")
+
+#         audio_data = base64.b64decode(audio_input.audio[21:])
+
+#         # mp3_file_path = "temp_audio.mp3"
+#         # async with aiofiles.open(mp3_file_path, "wb") as mp3_file:
+#         #     await mp3_file.write(audio_data)
+
+#         mp3_file_path = os.path.join(os.getcwd(), rf"app\features\blog\temp_audio.mp3")
+#         with open(mp3_file_path, "wb") as mp3_file:
+#             mp3_file.write(audio_data)
+#         print(mp3_file_path)
+
+#         text = convert_audio_to_text(mp3_file_path)
+
+#         # if os.path.exists(mp3_file_path):
+#         #     os.remove(mp3_file_path)
+#         print(text, "text")
+
+#         return {
+#             "message": "Destination summary fetched successfully",
+#             "success": True,
+#             "data": text,
+#         }
+#     except Exception as e:
+#         print(e)
+#         return {
+#             "message": "An error occurred while fetching the destination summary",
+#             "success": False,
+#         }
+
+
+# @blogRouter.websocket("/ws/transcribe-websocket")
+# async def websocket_transcribe(websocket: WebSocket):
+#     await websocket.accept()
+#     try:
+#         while True:
+#             # Receive audio data (Base64-encoded)
+#             data = await websocket.receive_text()
+#             audio_data = base64.b64decode(data)
+
+#             # Save the audio file temporarily
+#             mp3_file_path = os.path.join(os.getcwd(), "temp_audio.mp3")
+#             with open(mp3_file_path, "wb") as mp3_file:
+#                 mp3_file.write(audio_data)
+
+#             # Process the audio file
+#             text = convert_audio_to_text(mp3_file_path)
+#             print(text)
+
+#             await websocket.send_text(text)
+#     except Exception as e:
+#         print(f"WebSocket error: {e}")
+#         await websocket.close()

@@ -22,6 +22,7 @@ class Routes:
     SUBSCRIBE = "/subscribe"
     SUBSCRIBE_NEW_USER = "/subscribe-new-user"
     CONTACT_FORM = "/contact-form"
+    SUB_COUNT = "/subscribe-count"
     GET_USER = "/get-user"
     GET_USER_BLOGS = "/get-user-blogs"
     ADMIN_DASHBOARD = "/admin-dashboard"

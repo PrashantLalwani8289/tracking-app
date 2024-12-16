@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy import Index
 
 from sqlalchemy import (
     Boolean,
@@ -18,11 +19,12 @@ from app.database import Base
 
 class Blogs(Base):
     __tablename__ = "blogs"
+    __table_args__ = (Index("idx_user_created_ts", "user_id", "created_ts"),)
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    destination_place = Column(Text, default=None,nullable=True)
+    destination_place = Column(Text, default=None, nullable=True)
 
     title = Column(String, nullable=False)
     introduction = Column(Text, nullable=False)

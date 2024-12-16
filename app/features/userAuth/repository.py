@@ -6,7 +6,7 @@ import hmac
 import hashlib
 import base64
 import time
-
+from sqlalchemy import desc
 from passlib.hash import bcrypt
 from app.features.userAuth.utils import create_access_token, generate_random_password
 from app.models.Blogs import Blogs
@@ -17,7 +17,12 @@ from google.auth.transport import requests
 
 from app.common import constants
 from app.config import env_variables
-from app.features.userAuth.schemas import LoginUserSchema, Token, UploadImage, UserSchema
+from app.features.userAuth.schemas import (
+    LoginUserSchema,
+    Token,
+    UploadImage,
+    UserSchema,
+)
 
 from app.models.User import User
 from app.models.user_sessions import UserSession
@@ -26,10 +31,11 @@ env_data = env_variables()
 
 GOOGLE_CLIENT_ID = env_data["GOOGLE_CLIENT_ID"]
 
-async def signup(request: UserSchema, db : Session):
+
+async def signup(request: UserSchema, db: Session):
     try:
         password_hash = bcrypt.hash(request.password)
-        
+
         existing_user = (
             db.query(User).filter(User.email == request.email.lower()).first()
         )
@@ -51,16 +57,12 @@ async def signup(request: UserSchema, db : Session):
             password=password_hash,
             account_type="user",
             is_active=True,
-            last_login=datetime.now()
+            last_login=datetime.now(),
         )
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-        payload = {
-                "id": new_user.id,
-                "email": new_user.email,
-                "account_type": "user"
-            }
+        payload = {"id": new_user.id, "email": new_user.email, "account_type": "user"}
         access_token = create_access_token(payload)
         session = UserSession(user_id=new_user.id, token=access_token.decode())
         db.add(session)
@@ -69,13 +71,14 @@ async def signup(request: UserSchema, db : Session):
         return {
             "message": constants.SIGNUP_SUCCESS,
             "success": True,
-            "data":  {
-
-                    "user": {"token" : access_token,
-                            "name": new_user.full_name,
-                            "email": new_user.email, 
-                            "id": new_user.id},
+            "data": {
+                "user": {
+                    "token": access_token,
+                    "name": new_user.full_name,
+                    "email": new_user.email,
+                    "id": new_user.id,
                 },
+            },
         }
     except Exception as e:
         print("error in signup", e)
@@ -83,63 +86,69 @@ async def signup(request: UserSchema, db : Session):
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
-    
-async def login (request: LoginUserSchema, db:Session):
+
+
+async def login(request: LoginUserSchema, db: Session):
     try:
-        existing_user = db.query(User).filter(User.email == request.email.lower()).first()
+        existing_user = (
+            db.query(User).filter(User.email == request.email.lower()).first()
+        )
         if not existing_user:
-            return{
+            return {
                 "message": constants.USER_NOT_FOUND,
                 "success": False,
             }
         if existing_user and bcrypt.verify(request.password, existing_user.password):
-            existing_user.last_login = datetime.now()   
+            existing_user.last_login = datetime.now()
             payload = {
                 "id": existing_user.id,
                 "email": existing_user.email,
-                "account_type": "user"
+                "account_type": "user",
             }
             access_token = create_access_token(payload)
             session = UserSession(user_id=existing_user.id, token=access_token.decode())
             db.add(session)
             db.commit()
-            
-            return{
+
+            return {
                 "message": constants.LOGIN_SUCCESS,
                 "success": True,
-                "data":  {
-
-                    "user": {"token" : access_token,
-                            "name": existing_user.full_name,
-                            "email": existing_user.email, 
-                            "id": existing_user.id},
+                "data": {
+                    "user": {
+                        "token": access_token,
+                        "name": existing_user.full_name,
+                        "email": existing_user.email,
+                        "id": existing_user.id,
+                    },
                 },
             }
-            
-            
+
         else:
-            return{
+            return {
                 "message": constants.INCORRECT_CREDENTIALS,
                 "success": False,
             }
-        
+
     except Exception as e:
         print("error in login", e)
         return {
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
-        
-async def google_log_in(request:Token,db:Session ):
+
+
+async def google_log_in(request: Token, db: Session):
     try:
-        id_info = id_token.verify_oauth2_token(request.credentials, requests.Request(), GOOGLE_CLIENT_ID)
-        if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-            return{
+        id_info = id_token.verify_oauth2_token(
+            request.credentials, requests.Request(), GOOGLE_CLIENT_ID
+        )
+        if id_info["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
+            return {
                 "message": constants.INVALID_GOOGLE_TOKEN,
                 "success": False,
             }
-        email = id_info.get('email')
-        full_name = id_info.get('name')
+        email = id_info.get("email")
+        full_name = id_info.get("name")
         existing_user = db.query(User).filter(User.email == email).first()
         if existing_user:
             existing_user.last_login = datetime.now()
@@ -147,21 +156,23 @@ async def google_log_in(request:Token,db:Session ):
             payload = {
                 "id": existing_user.id,
                 "email": existing_user.email,
-                "account_type": "user"
+                "account_type": "user",
             }
             access_token = create_access_token(payload)
             session = UserSession(user_id=existing_user.id, token=access_token.decode())
             db.add(session)
             db.commit()
-            
-            return{
+
+            return {
                 "message": constants.LOGIN_SUCCESS,
                 "success": True,
-                "data":  {
-                    "user": {"token" : access_token,
-                            "name": existing_user.full_name,
-                            "email": existing_user.email, 
-                            "id": existing_user.id},
+                "data": {
+                    "user": {
+                        "token": access_token,
+                        "name": existing_user.full_name,
+                        "email": existing_user.email,
+                        "id": existing_user.id,
+                    },
                 },
             }
         else:
@@ -173,12 +184,12 @@ async def google_log_in(request:Token,db:Session ):
                 password=password_hash,
                 account_type="user",
                 is_active=True,
-                last_login=datetime.now()
+                last_login=datetime.now(),
             )
             payload = {
                 "id": existing_user.id,
                 "email": existing_user.email,
-                "account_type": "user"
+                "account_type": "user",
             }
             access_token = create_access_token(payload)
             session = UserSession(user_id=new_user.id, token=access_token.decode())
@@ -187,54 +198,53 @@ async def google_log_in(request:Token,db:Session ):
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
-            return{
+            return {
                 "message": constants.LOGIN_SUCCESS,
                 "success": True,
-                "data":  {
-                    "user": {"token" : access_token,
-                            "name": new_user.full_name,
-                            "email": new_user.email, 
-                            "id": new_user.id},
+                "data": {
+                    "user": {
+                        "token": access_token,
+                        "name": new_user.full_name,
+                        "email": new_user.email,
+                        "id": new_user.id,
+                    },
                 },
             }
-            
+
     except Exception as e:
         print(e)
-        return{
+        return {
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
-        
-IMAGEKIT_PRIVATE_KEY = env_data['IMAGEKIT_PRIVATE_KEY']
+
+
+IMAGEKIT_PRIVATE_KEY = env_data["IMAGEKIT_PRIVATE_KEY"]
+
+
 # IMAGEKIT_PUBLIC_KEY = env_data['IMAGEKIT_PUBLIC_KEY']
-# IMAGEKIT_URL_ENDPOINT = env_data['IMAGEKIT_URL_ENDPOINT']     
+# IMAGEKIT_URL_ENDPOINT = env_data['IMAGEKIT_URL_ENDPOINT']
 async def upload_blog_image():
     try:
         token = base64.urlsafe_b64encode(os.urandom(32)).decode()
         expire = str(int(time.time()) + 600)  # Token is valid for 10 minutes
         signature = hmac.new(
-            IMAGEKIT_PRIVATE_KEY.encode(),
-            (token + expire).encode(),
-            hashlib.sha1
+            IMAGEKIT_PRIVATE_KEY.encode(), (token + expire).encode(), hashlib.sha1
         ).hexdigest()
-        return{
+        return {
             "message": constants.UPLOAD_BLOG_IMAGE_SUCCESSFULL,
             "success": True,
-            "data": {
-                "token": token,
-                "expire": expire,
-                "signature": signature
-            }
+            "data": {"token": token, "expire": expire, "signature": signature},
         }
     except Exception as e:
         print(e)
-        return{
+        return {
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
-    
-    
-async def get_user(userId : int, db = Session):
+
+
+async def get_user(userId: int, db=Session):
     try:
         user = db.query(User).filter(User.id == userId).first()
         if user:
@@ -248,9 +258,9 @@ async def get_user(userId : int, db = Session):
                         "email": user.email,
                         "account_type": user.account_type,
                         "is_active": user.is_active,
-                        "last_login": user.last_login
+                        "last_login": user.last_login,
                     }
-                }
+                },
             }
         else:
             return {
@@ -263,21 +273,33 @@ async def get_user(userId : int, db = Session):
             "message": constants.INTERNAL_SERVER_ERROR,
             "success": False,
         }
-        
-        
-async def get_user_blogs(userId : int, db = Session):
+
+
+async def get_user_blogs(userId: int, db=Session):
     try:
-        blogs = db.query(Blogs).filter(Blogs.user_id == userId).limit(10)
+        user = db.query(User).filter(User.id == userId).first()
+        if not user:
+            return {
+                "message": constants.USER_NOT_FOUND,
+                "success": False,
+            }
+        blogs = (
+            db.query(Blogs)
+            .filter(Blogs.user_id == userId)
+            .order_by(desc(Blogs.created_ts))
+            .all()
+        )
         if blogs:
             return {
                 "message": constants.BLOGS_FOUND,
                 "success": True,
-                "data": [blog.to_dict() for blog in blogs]
+                "data": [blog.to_dict() for blog in blogs],
             }
         else:
             return {
                 "message": constants.BLOGS_NOT_FOUND,
                 "success": False,
+                "data": [],
             }
     except Exception as e:
         print("error in getUser", e)

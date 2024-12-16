@@ -5,6 +5,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from pydantic import BaseModel
+
 # from fastapi.routing import APIRouter
 
 
@@ -19,13 +20,12 @@ def get_application():
     _app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     _app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
+        allow_origins=["http://localhost:5173", "http://localhost:5174"],
         allow_credentials=True,
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type"],
     )
     # _app.add_middleware(HTTPSRedirectMiddleware)
-
 
     _app.include_router(router=root_router, prefix=settings.API_V1_STR)
 

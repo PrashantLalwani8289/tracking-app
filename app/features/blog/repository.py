@@ -10,11 +10,10 @@
 # The token can be sent in headers or form data by the frontend, ensuring it is not exposed in cookies or URLs.
 
 
-
 from datetime import datetime
 import json
 from fastapi_csrf_protect import CsrfProtect
-
+from sqlalchemy import desc
 from app.features.blog.response import GPT
 from app.features.blog.schemas import (
     CommentSchema,
@@ -101,14 +100,17 @@ async def get_blog(BlogId: int, db: Session):
 
 async def get_all_blogs(db: Session, csrf_protect: CsrfProtect):
 
-    
     try:
         # csrf_protect
         # csrf_protect.validate_csrf_in_cookies()
         token = csrf_protect.generate_csrf()
-        print(token,"token")
+        print(token, "token")
         print(csrf_protect)
-        blogs = db.query(Blogs).limit(10)
+        blogs = (
+            db.query(Blogs)
+            # .filter(Blogs.user_id == user_id)
+            .order_by(desc(Blogs.created_ts)).all()
+        )
         if not blogs:
             return {
                 "message": "Blogs not found",

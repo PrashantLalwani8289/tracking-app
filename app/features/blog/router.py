@@ -3,6 +3,16 @@ from datetime import datetime
 import os
 from typing import Union
 from fastapi import APIRouter, Depends, Query, WebSocket
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from fastapi import Request
+from pydantic import BaseModel
+from fastapi_csrf_protect import CsrfProtect
+class CsrfSettings(BaseModel):
+    secret_key: str = "your-secret-key"
+
+# Ensure the limiter is imported from the app state
+limiter = Limiter(key_func=get_remote_address)
 
 # from fastapi import File, UploadFile, HTTPException
 from pydantic import BaseModel
@@ -42,6 +52,11 @@ blogRouter = APIRouter(prefix=routes.BLOG)
 # model = model.float()
 
 
+@CsrfProtect.load_config
+def get_csrf_config():
+    return CsrfSettings()
+
+
 @blogRouter.post(routes.CREATE_BLOG, response_model=ResponseModal)
 async def create_new_blog(
     request: CreateBlog,
@@ -60,8 +75,9 @@ async def get_the_blog(
 
 
 @blogRouter.get(routes.GET_ALL_BLOG, response_model=ResponseModal)
-async def get_the_blog(db: Session = Depends(db_connection)):
-    return await get_all_blogs(db)
+@limiter.limit("5/minute")
+async def get_the_blog(request: Request, db : Session = Depends(db_connection), csrf_protect: CsrfProtect = Depends()):
+    return await get_all_blogs(db, csrf_protect)
 
 
 @blogRouter.get(routes.GET_TOP_3_BLOGS, response_model=ResponseModal)

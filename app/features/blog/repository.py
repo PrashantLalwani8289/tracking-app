@@ -1,5 +1,20 @@
+# CSRF Token Generation:
+
+# Use the /csrf-token route to fetch a CSRF token. The frontend should store this token (e.g., in a meta tag or JavaScript variable).
+# CSRF Token Validation:
+
+# In protected routes (e.g., /protected-route), the token must be included in the request's body, header, or form data.
+# The backend validates the token using csrf_protect.validate_csrf().
+# Token Storage:
+
+# The token can be sent in headers or form data by the frontend, ensuring it is not exposed in cookies or URLs.
+
+
+
 from datetime import datetime
 import json
+from fastapi_csrf_protect import CsrfProtect
+
 from app.features.blog.response import GPT
 from app.features.blog.schemas import (
     CommentSchema,
@@ -84,8 +99,15 @@ async def get_blog(BlogId: int, db: Session):
         }
 
 
-async def get_all_blogs(db: Session):
+async def get_all_blogs(db: Session, csrf_protect: CsrfProtect):
+
+    
     try:
+        # csrf_protect
+        # csrf_protect.validate_csrf_in_cookies()
+        token = csrf_protect.generate_csrf()
+        print(token,"token")
+        print(csrf_protect)
         blogs = db.query(Blogs).limit(10)
         if not blogs:
             return {

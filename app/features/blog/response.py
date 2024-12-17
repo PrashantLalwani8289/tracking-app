@@ -7,13 +7,13 @@ class GPT:
     print(env_variables)
 
     def __init__(self):
-        self.api_key = ""
+        self.api_key = "AIzaSyBdkxYZVKYug808_qJRGmFkh6IGSAIt-Zg"
 
     def query(self, input: str) -> list:
         genai.configure(api_key=self.api_key)
         prompt = f"""
         {{
-            "task": "Generate a detailed travel guide for a specific destination based on the provided input.",
+            "task": "Generate a detailed travel guide for a specific destination based on the provided input.Provide only the details of the input_destination, the below example are for your refrence to understand the type of ouptut.",
             "instruction": "Write a comprehensive travel guide for the given destination. The guide should be engaging and provide essential information for travelers. Use a professional and inviting tone to make the guide both informative and inspiring.",
             "input_destination": "{input}",
             "response_requirements": {{

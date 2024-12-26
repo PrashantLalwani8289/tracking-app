@@ -53,6 +53,10 @@ class LikeSchema(BaseModel):
     user_id: int
 
 
+class GetLikes(BaseModel):
+    blog_id: int | str
+
+
 class CommentSchema(BaseModel):
     user_id: int | None = None
     blog_id: int

@@ -8,8 +8,9 @@
 # Token Storage:
 
 # The token can be sent in headers or form data by the frontend, ensuring it is not exposed in cookies or URLs.
-
-
+import threading
+from app.utils.Jobs.jobs import BackgroundTasks
+from confluent_kafka import Producer, Consumer, KafkaException
 from datetime import datetime
 import json
 from fastapi_csrf_protect import CsrfProtect
@@ -20,6 +21,7 @@ from app.features.blog.schemas import (
     CreateBlog,
     CurrentUser,
     Destination,
+    GetLikes,
     LikeSchema,
 )
 from app.models import Subscribers
@@ -30,6 +32,13 @@ from app.models.Blogs import Blogs
 from app.models.Comment import Comment
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+kafka_bootstrap_servers = "localhost:9092"
+topic = "likes_topic"
+
+from app.utils.Jobs.background import jobs
+
+producer = Producer({"bootstrap.servers": kafka_bootstrap_servers})
 
 
 async def create_blog(request: CreateBlog, db: Session, current_user: CurrentUser):
@@ -185,7 +194,10 @@ async def get_all_blogs_by_category(category: str, db: Session):
 async def handle_reaction(request: LikeSchema, db: Session, current_user: CurrentUser):
     try:
         current_user_id = current_user["id"]
-        print(current_user)
+        print(request, "request")
+        print(current_user, "current_user")
+        producer.produce(topic, key="like", value="1")
+        producer.flush()
         user = db.query(User).filter(User.id == int(current_user_id)).first()
         if not user:
             return {
@@ -201,9 +213,10 @@ async def handle_reaction(request: LikeSchema, db: Session, current_user: Curren
         like = (
             db.query(Like)
             .filter(request.blog_id == Like.blog_id)
-            .filter(request.user_id == Like.user_id)
-            .first()
+            .filter(current_user_id == Like.user_id)
+            .all()
         )
+
         if like:
             db.delete(like)
             db.commit()
@@ -217,7 +230,7 @@ async def handle_reaction(request: LikeSchema, db: Session, current_user: Curren
         )
         db.add(like)
         db.commit()
-        db.refresh(like)
+        print("like: ", like.to_dict())
         return {
             "message": "Reaction handled successfully",
             "success": True,
@@ -228,6 +241,70 @@ async def handle_reaction(request: LikeSchema, db: Session, current_user: Curren
             "message": "An error occurred while handling reaction",
             "success": False,
         }
+
+
+# threading.Thread(target=jobs.consume_likes, daemon=True).start()
+
+# def consume_likes():
+#     consumer = Consumer(
+#         {
+#             "bootstrap.servers": kafka_bootstrap_servers,
+#             "group.id": "like-counter-group",
+#             "auto.offset.reset": "earliest",
+#         }
+#     )
+#     consumer.subscribe([topic])
+
+#     try:
+#         while True:
+#             msg = consumer.poll(1.0)
+#             if msg is None:
+#                 continue
+#             if msg.error():
+#                 if msg.error().code() == KafkaException._PARTITION_EOF:
+#                     continue
+#                 else:
+#                     print(msg.error())
+#                     break
+#             # Update like count
+#             likes_count["total_likes"] += 1
+#             print(f"Total likes: {likes_count['total_likes']}")
+#     finally:
+#         consumer.close()
+
+
+def get_likes():
+    # print(current_user)
+    likes = jobs.likes_count_value
+    print(likes, "from socket")
+    return likes
+
+
+async def get_is_liked(request: GetLikes, db: Session, current_user: CurrentUser):
+    try:
+        user_id = current_user["id"]
+        print(user_id, request.blog_id)
+        like = (
+            db.query(Like)
+            .filter(request.blog_id == Like.blog_id)
+            .filter(Like.user_id == int(user_id))
+            .first()
+        )
+        print(like, "like")
+        if like:
+            return {
+                "message": "User has liked the blog",
+                "success": True,
+            }
+        return {
+            "message": "User has not liked the blog",
+            "success": True,
+        }
+    except Exception as e:
+        print(e)
+
+
+# Start Kafka consumer in a separate thread
 
 
 async def add_comment(request: CommentSchema, db: Session, current_user: CurrentUser):
@@ -321,11 +398,11 @@ async def get_destination_summary(
             }
         destination = request.destination
         response = GPT().query(input=destination)
-        data = json.loads(response)
+        # data = json.loads(response)
         return {
             "message": "Destination summary fetched successfully",
             "success": True,
-            "data": data,
+            "data": response,
         }
     except Exception as e:
         print(e)

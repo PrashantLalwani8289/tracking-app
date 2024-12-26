@@ -1,15 +1,47 @@
+import asyncio
 import base64
 from datetime import datetime
+import json
 import os
 from typing import Union
 from fastapi import APIRouter, Depends, Query, WebSocket
+from fastapi import WebSocketDisconnect
+from fastapi.websockets import WebSocketState
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from fastapi import Request
 from pydantic import BaseModel
 from fastapi_csrf_protect import CsrfProtect
+
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, websocket: WebSocket, message: int):
+        if websocket.client_state == WebSocketState.CONNECTED:
+            await websocket.send_text(message)
+
+    async def broadcast(self, message: int):
+        for connection in self.active_connections:
+            if connection.client_state == WebSocketState.CONNECTED:
+                await connection.send_text(json.dumps(message))
+
+
+manager = ConnectionManager()
+
+
 class CsrfSettings(BaseModel):
     secret_key: str = "your-secret-key"
+
 
 # Ensure the limiter is imported from the app state
 limiter = Limiter(key_func=get_remote_address)
@@ -24,10 +56,18 @@ from app.features.blog.repository import (
     get_all_comments,
     get_blog,
     get_destination_summary,
+    get_is_liked,
+    get_likes,
     get_top_3_blogs,
     handle_reaction,
 )
-from app.features.blog.schemas import CommentSchema, CreateBlog, Destination, LikeSchema
+from app.features.blog.schemas import (
+    CommentSchema,
+    CreateBlog,
+    Destination,
+    GetLikes,
+    LikeSchema,
+)
 from app.utils.routes import routes
 from sqlalchemy.orm import Session
 
@@ -76,7 +116,11 @@ async def get_the_blog(
 
 @blogRouter.get(routes.GET_ALL_BLOG, response_model=ResponseModal)
 @limiter.limit("5/minute")
-async def get_the_blog(request: Request, db : Session = Depends(db_connection), csrf_protect: CsrfProtect = Depends()):
+async def get_the_blog(
+    request: Request,
+    db: Session = Depends(db_connection),
+    csrf_protect: CsrfProtect = Depends(),
+):
     return await get_all_blogs(db, csrf_protect)
 
 
@@ -99,6 +143,27 @@ async def handle_like(
     currentUser: dict = Depends(is_user_authorised),
 ):
     return await handle_reaction(request, db, currentUser)
+
+
+@blogRouter.post(routes.IS_LIKED, response_model=ResponseModal)
+async def is_liked_by_me(
+    request: GetLikes,
+    db: Session = Depends(db_connection),
+    currentUser: dict = Depends(is_user_authorised),
+):
+    return await get_is_liked(request, db, currentUser)
+
+
+@blogRouter.websocket(routes.GET_LIKES)
+async def return_likes(
+    websocket: WebSocket,
+):
+    await manager.connect(websocket)
+    while len(manager.active_connections) > 0:
+        likes = get_likes()
+        print(likes)
+        await manager.broadcast(likes)
+        await asyncio.sleep(5)
 
 
 @blogRouter.post(routes.ADD_COMMENT, response_model=ResponseModal)

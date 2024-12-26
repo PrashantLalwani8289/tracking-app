@@ -28,11 +28,13 @@ class Routes:
     ADMIN_DASHBOARD = "/admin-dashboard"
     MINI_CARD_DETAILS = "/mini-cards-details"
     HANDLE_REACTION = "/reaction"
+    GET_LIKES = "/get-likes"
     ADD_COMMENT = "/add-comment"
     GET_COMMENTS = "/get-comments"
     GET_ALL_BLOG_BY_CATEGORY = "/get-blog-by-category"
     GET_TOP_3_BLOGS = "/get-top-3-blogs"
     GET_AUTO_BLOGS = "/get-auto-blogs"
+    IS_LIKED = "/is-liked"
 
 
 routes = Routes()

@@ -115,7 +115,7 @@ async def get_the_blog(
 
 
 @blogRouter.get(routes.GET_ALL_BLOG, response_model=ResponseModal)
-@limiter.limit("5/minute")
+# @limiter.limit("5/minute")
 async def get_the_blog(
     request: Request,
     db: Session = Depends(db_connection),

@@ -39,7 +39,11 @@ def get_application():
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type"],
     )
+
     # _app.add_middleware(HTTPSRedirectMiddleware)
+    @_app.get("/")
+    def read_root():
+        return {"message": "API is running successfully!"}
 
     _app.include_router(router=root_router, prefix=settings.API_V1_STR)
 

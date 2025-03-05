@@ -11,6 +11,9 @@ from confluent_kafka import Consumer, KafkaException
 from app.config import env_variables
 
 keys = env_variables()
+from app.utils.redis.redis import RedisClient
+
+# redis_client = RedisClient()
 
 engine = create_engine(keys["DATABASE_URI"], pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -24,6 +27,8 @@ class BackgroundTasks:
     def __init__(self):
         self.scheduler = None
         self.likes_count = 0
+        self.redis_client = RedisClient()  # Initialize RedisClient
+        self.redis_client.connect()
 
     @contextmanager
     def db_connection(self):
@@ -48,6 +53,9 @@ class BackgroundTasks:
                 print(likes, "likes")
                 self.likes_count = likes
                 print(self.likes_count, "likes")
+                redis_client = self.redis_client.get_client()
+                redis_client.set("likes_count", self.likes_count)
+                print("Likes count stored in Redis")
 
         except Exception as e:
             print("Error in 'deactivate_quizzes': ", e)
@@ -65,6 +73,7 @@ class BackgroundTasks:
             }
         )
         consumer.subscribe([topic])
+        redis_client = self.redis_client.get_client()
 
         try:
             while True:
@@ -80,13 +89,21 @@ class BackgroundTasks:
                 # Update like count
                 self.likes_count += 1
                 print(f"Total likes: {self.likes_count}")
+
+                redis_client.set("likes_count", self.likes_count)
         finally:
             consumer.close()
+
+    def get_likes_from_redis(self):
+        """Retrieve likes count from Redis."""
+        redis_client = self.redis_client.get_client()
+        likes_count = redis_client.get("likes_count")
+        return int(likes_count) if likes_count else 0
 
     def start(self):
         self.scheduler = BackgroundScheduler()
         # self.scheduler.get_likes()
-        self.scheduler.add_job(self.get_likes, CronTrigger(hour=18, minute=13))
+        self.scheduler.add_job(self.get_likes, CronTrigger(hour=12, minute=31))
         self.scheduler.start()
         print("Scheduler started!")
 

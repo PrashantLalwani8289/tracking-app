@@ -9,11 +9,13 @@
 
 # The token can be sent in headers or form data by the frontend, ensuring it is not exposed in cookies or URLs.
 import threading
-from app.utils.Jobs.jobs import BackgroundTasks
-from confluent_kafka import Producer, Consumer, KafkaException
+
+# from app.utils.Jobs.jobs import BackgroundTasks
+# from confluent_kafka import Producer, Consumer, KafkaException
 from datetime import datetime
 import json
-from fastapi_csrf_protect import CsrfProtect
+
+# from fastapi_csrf_protect import CsrfProtect
 from sqlalchemy import desc
 from app.features.blog.response import GPT
 from app.features.blog.schemas import (
@@ -36,9 +38,9 @@ from sqlalchemy.orm import Session
 kafka_bootstrap_servers = "localhost:9092"
 topic = "likes_topic"
 
-from app.utils.Jobs.background import jobs
+# from app.utils.Jobs.background import jobs
 
-producer = Producer({"bootstrap.servers": kafka_bootstrap_servers})
+# producer = Producer({"bootstrap.servers": kafka_bootstrap_servers})
 
 
 async def create_blog(request: CreateBlog, db: Session, current_user: CurrentUser):
@@ -107,14 +109,17 @@ async def get_blog(BlogId: int, db: Session):
         }
 
 
-async def get_all_blogs(db: Session, csrf_protect: CsrfProtect):
+async def get_all_blogs(
+    db: Session,
+    # csrf_protect: CsrfProtect
+):
 
     try:
         # csrf_protect
         # csrf_protect.validate_csrf_in_cookies()
-        token = csrf_protect.generate_csrf()
-        print(token, "token")
-        print(csrf_protect)
+        # token = csrf_protect.generate_csrf()
+        # print(token, "token")
+        # print(csrf_protect)
         blogs = (
             db.query(Blogs)
             # .filter(Blogs.user_id == user_id)
@@ -196,8 +201,8 @@ async def handle_reaction(request: LikeSchema, db: Session, current_user: Curren
         current_user_id = current_user["id"]
         print(request, "request")
         print(current_user, "current_user")
-        producer.produce(topic, key="like", value="1")
-        producer.flush()
+        # producer.produce(topic, key="like", value="1")
+        # producer.flush()
         user = db.query(User).filter(User.id == int(current_user_id)).first()
         if not user:
             return {
@@ -275,7 +280,8 @@ async def handle_reaction(request: LikeSchema, db: Session, current_user: Curren
 
 def get_likes():
     # print(current_user)
-    likes = jobs.likes_count_value
+    # likes = jobs.likes_count_value
+    likes = 0
     print(likes, "from socket")
     return likes
 
@@ -397,12 +403,14 @@ async def get_destination_summary(
                 "success": False,
             }
         destination = request.destination
+        print(destination, "destination")
         response = GPT().query(input=destination)
-        # data = json.loads(response)
+        data = json.loads(response)
+        print(data, "data")
         return {
             "message": "Destination summary fetched successfully",
             "success": True,
-            "data": response,
+            "data": data,
         }
     except Exception as e:
         print(e)

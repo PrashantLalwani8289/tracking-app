@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 # from app.utils.Jobs.jobs import BackgroundTasks
-from app.utils.Jobs.background import jobs
+# from app.utils.Jobs.background import jobs
+from app.utils.redis.redis import RedisClient
 from slowapi.errors import RateLimitExceeded
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -15,8 +16,9 @@ from pydantic import BaseModel
 from .core.config import settings
 from .features.root_router import router as root_router
 
-
-jobs.start()
+# Redis = RedisClient()
+# Redis.connect()
+# jobs.start()
 
 
 def get_application():

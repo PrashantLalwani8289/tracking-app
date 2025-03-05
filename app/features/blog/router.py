@@ -119,9 +119,9 @@ async def get_the_blog(
 async def get_the_blog(
     request: Request,
     db: Session = Depends(db_connection),
-    csrf_protect: CsrfProtect = Depends(),
+    # csrf_protect: CsrfProtect = Depends(),
 ):
-    return await get_all_blogs(db, csrf_protect)
+    return await get_all_blogs(db)
 
 
 @blogRouter.get(routes.GET_TOP_3_BLOGS, response_model=ResponseModal)
